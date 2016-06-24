@@ -99,6 +99,14 @@ namespace NSwag.Commands
             set { Settings.GenerateKnownTypes = value; }
         }
 
+        [Description("Generate Swagger specification info.title attributes (default: empty).")]
+        [Argument(Name = "InfoTitle", IsRequired = false)]
+        public string InfoTitle { get; set; }
+
+        [Description("Generate Swagger specification info.version attributes (default: empty).")]
+        [Argument(Name = "InfoVersion", IsRequired = false)]
+        public string InfoVersion { get; set; }
+
         public override async Task<object> RunAsync(CommandLineProcessor processor, IConsoleHost host)
         {
             var service = await RunAsync();
@@ -121,7 +129,13 @@ namespace NSwag.Commands
                 if (!controllerNames.Any() && Settings.AssemblyPaths?.Length > 0)
                     controllerNames = generator.GetControllerClasses().ToList();
 
-                return generator.GenerateForControllers(controllerNames);
+                var service = generator.GenerateForControllers(controllerNames);
+
+                // TODO 仮に引数で直接指定できるようにしているが、何かしらの形でアセンブリから規定値を取得、上書きなどできる設定を行えるとよい
+                service.Info.Title = InfoTitle;
+                service.Info.Version = InfoVersion;
+
+                return service;
             });
         }
     }
